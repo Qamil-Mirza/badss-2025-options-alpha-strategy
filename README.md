@@ -19,7 +19,8 @@ The code is organized into modular components for flexibility and ease of experi
 - `sim.py`: Core simulation engine
 - `strategies.py`: Modular trading strategies
 - `data/` : Directory for training and test datasets
-- `results` : Directory for generated strategy results
+- `results/` : Directory for generated strategy results
+- `plots/` : Directory containing relevant strategy plots
 - `README.md` : Documentation
 
 ### **1️⃣ simulator.py - Simulation Engine**
