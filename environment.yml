@@ -1,0 +1,4 @@
+name: badss
+channels:
+  - defaults
+prefix: /home/qamil/anaconda3/envs/badss
