@@ -1,6 +1,6 @@
 import pandas as pd
 from sim import OptionTradingSimulator
-from strategies import ATMStrategy, OTMStrategy
+from strategies import ATMStrategy, OTMStrategy, BuyEverythingStrategy
 
 if __name__ == "__main__":
     # Load the data
