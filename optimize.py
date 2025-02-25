@@ -3,13 +3,32 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory
 
 # ------------------------------
-# Data Preparation (same as before)
+# HYPERPARAMETERS
+# ------------------------------
+WALL_TIME = 300  # seconds TODO: Update this using a more robust heuristic (optimality gap, etc.)
+CONTRACT_SIZE = 100  # contract size for options
+MIN_EXPOSURE = 10_000_000
+SOLVER = 'cbc'
+OUTPUT_FILE = "./results/optimized_trades.csv"
+
+
+# TODO: Update spot move values dynamically each day, sample spot moves rfom some distribution??
+spot_move = {
+    'SPY': 1.03,
+    'QQQ': 1.041,
+    'IWM': 1.036,
+}
+
+# ------------------------------
+# Data Preparation
 # ------------------------------
 data = pd.read_csv("./data/BADSS training data.csv")
 data.columns = data.columns.str.strip().str.replace(" ", "_")
 data['Option_ID'] = data['Symbol'] + "_" + data['Maturity'] + "_" + data['Strike'].astype(str)
 option_ids = data['Option_ID'].tolist()
 
+# Create mappings for option data
+symbol = data.set_index('Option_ID')['Symbol'].to_dict()
 ask_price = data.set_index('Option_ID')['Ask_Price'].to_dict()
 bid_price = data.set_index('Option_ID')['Bid_Price'].to_dict()
 ask_size  = data.set_index('Option_ID')['Ask_Size'].to_dict()
@@ -22,17 +41,16 @@ maturity_map = data.set_index('Option_ID')['Maturity'].to_dict()
 unique_dates = data['Date'].unique().tolist()
 
 # Define exposure parameters for a call option
-def exposure_increment(undl, k):
-    return max(undl * 1.03 - k, 0) - max(undl - k, 0)
+def exposure_increment(undl, k, sym):
+    move = spot_move[sym]
+    return max(undl * move - k, 0) - max(undl - k, 0)
 
-exposure = {o: exposure_increment(undl_price[o], strike[o]) for o in option_ids}
+exposure = {o: exposure_increment(undl_price[o], strike[o], symbol[o]) for o in option_ids}
 
 # ------------------------------
 # Create mapping for next trading day
 # ------------------------------
-# Sort the dates (assuming they are in a format that pd.to_datetime can parse)
 sorted_dates = sorted(unique_dates, key=lambda x: pd.to_datetime(x))
-# Create a mapping from each date to the next date (if available)
 next_date = {d: sorted_dates[i+1] if i+1 < len(sorted_dates) else None 
              for i, d in enumerate(sorted_dates)}
 
@@ -80,39 +98,37 @@ def expired_option_rule_sell(model, o):
         return Constraint.Skip
 model.expired_sell = Constraint(model.OPTIONS, rule=expired_option_rule_sell)
 
-# Daily minimum exposure constraint:
-min_exposure = 10_000_000
-
+# Exposure constraint
 def exposure_rule(model, d):
     # Only enforce the exposure constraint if there is a "next day"
     nd = next_date[d]
     if nd is None:
-         return Constraint.Skip  # or set to 0 if last day has no requirement
+         return Constraint.Skip
     expr = sum(
-        (model.buy[o] - model.sell[o]) * 100 * exposure[o]
+        (model.buy[o] - model.sell[o]) * CONTRACT_SIZE * exposure[o]
         for o in model.OPTIONS 
         if (date_map[o] == d and pd.to_datetime(maturity_map[o]) >= pd.to_datetime(nd))
     )
-    return expr >= min_exposure
+    return expr >= MIN_EXPOSURE
 model.exposure_constraint = Constraint(model.DATES, rule=exposure_rule)
 
 # ------------------------------
 # Objective Function
 # ------------------------------
 def objective_rule(model):
-    return sum(model.buy[o] * ask_price[o] * 100 - model.sell[o] * bid_price[o] * 100
+    return sum(model.buy[o] * ask_price[o] * CONTRACT_SIZE - model.sell[o] * bid_price[o] * CONTRACT_SIZE
                for o in model.OPTIONS)
 model.obj = Objective(rule=objective_rule, sense=minimize)
 
 # ------------------------------
 # Solve the Model
 # ------------------------------
-solver = SolverFactory('cbc')
-solver.options['sec'] = 10  # 10-second time limit
+solver = SolverFactory(SOLVER)
+solver.options['sec'] = WALL_TIME  # 10-second time limit
 results = solver.solve(model, tee=True)
 
 # ------------------------------
-# Save Results (postprocessing remains similar)
+# Save Results
 # ------------------------------
 results_list = []
 for o in model.OPTIONS:
@@ -124,7 +140,7 @@ for o in model.OPTIONS:
         buy_qty = 0
         sell_qty = 0
     if (buy_qty is not None and buy_qty > 0) or (sell_qty is not None and sell_qty > 0):
-        premium_cost = (buy_qty * 100 * ask_price[o]) - (sell_qty * 100 * bid_price[o])
+        premium_cost = (buy_qty * CONTRACT_SIZE * ask_price[o]) - (sell_qty * CONTRACT_SIZE * bid_price[o])
         results_list.append({
             "Date": date_map[o],
             "Option_ID": o,
@@ -138,11 +154,11 @@ for o in model.OPTIONS:
 
 daily_exposure = []
 for d in model.DATES:
-    exposure_sum = sum((model.buy[o].value - model.sell[o].value) * 100 * exposure[o]
+    exposure_sum = sum((model.buy[o].value - model.sell[o].value) * CONTRACT_SIZE * exposure[o]
                        for o in model.OPTIONS if date_map[o] == d)
     daily_exposure.append({"Date": d, "Exposure": exposure_sum})
 exposure_df = pd.DataFrame(daily_exposure)
 results_df = pd.DataFrame(results_list)
 out_df = results_df.merge(exposure_df, on="Date", how="left")
-out_df.to_csv("optimized_trades.csv", index=False)
-print("Results saved to optimized_trades.csv")
+out_df.to_csv(OUTPUT_FILE, index=False)
+print(f"Results saved to {OUTPUT_FILE}")
