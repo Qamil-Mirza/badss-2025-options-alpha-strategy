@@ -10,7 +10,7 @@ WALL_TIME = 10  # 5-minute time limit
 CONTRACT_SIZE = 100  # contract size for options
 MIN_EXPOSURE = 10_000_000
 SOLVER = 'cbc'
-OUTPUT_FILE = "../results/milp_optimized_trades.csv"
+OUTPUT_FILE = "../results/pnlmin_optimized_trades.csv"
 
 # ------------------------------
 # Data Preparation
@@ -66,6 +66,29 @@ for date in unique_dates:
 sorted_dates = sorted(unique_dates, key=lambda x: pd.to_datetime(x))
 next_date = {d: sorted_dates[i+1] if i+1 < len(sorted_dates) else None 
              for i, d in enumerate(sorted_dates)}
+
+# Find for each option ID the corresponding option for the next date (if exists)
+def find_next_day_option(option_id, next_d):
+    """Find the option with the same symbol, maturity, and strike on the next trading day"""
+    if next_d is None:
+        return None
+        
+    parts = option_id.split("_")
+    sym = parts[0]
+    maturity = parts[1]
+    strike_val = parts[2]
+    
+    # Search for a matching option
+    next_option = [o for o in option_ids 
+                  if symbol[o] == sym 
+                  and maturity_map[o] == maturity 
+                  and strike[o] == float(strike_val)
+                  and date_map[o] == next_d]
+    
+    return next_option[0] if next_option else None
+
+# Create dictionary mapping option IDs to their next day equivalents
+next_day_option = {o: find_next_day_option(o, next_date.get(date_map[o])) for o in option_ids}
 
 # ------------------------------
 # Define exposure parameters for a call option with dynamic spot moves
@@ -137,11 +160,34 @@ def exposure_rule(model, d):
 model.exposure_constraint = Constraint(model.DATES, rule=exposure_rule)
 
 # ------------------------------
-# Objective Function
+# Objective Function - Minimize Premium P&L
 # ------------------------------
 def objective_rule(model):
-    return sum(model.buy[o] * ask_price[o] * CONTRACT_SIZE - model.sell[o] * bid_price[o] * CONTRACT_SIZE
-               for o in model.OPTIONS)
+    p_and_l = 0
+    
+    # For each option
+    for o in model.OPTIONS:
+        d = date_map[o]
+        next_d = next_date.get(d)
+        if next_d is None:
+            continue
+            
+        # Get the next day's equivalent option (if it exists)
+        next_o = next_day_option.get(o)
+        
+        if next_o is not None:
+            # Premium paid today
+            premium_today = model.buy[o] * ask_price[o] * CONTRACT_SIZE - model.sell[o] * bid_price[o] * CONTRACT_SIZE
+            
+            # Calculate the P&L when liquidating the position on the next day
+            # This is a simplification - in reality you might want a more complex valuation model
+            premium_next_day = model.buy[o] * bid_price[next_o] * CONTRACT_SIZE - model.sell[o] * ask_price[next_o] * CONTRACT_SIZE
+            
+            # Add to total P&L (negative because we want to minimize losses)
+            p_and_l += (premium_today - premium_next_day)
+    
+    return p_and_l
+    
 model.obj = Objective(rule=objective_rule, sense=minimize)
 
 # ------------------------------
@@ -165,29 +211,65 @@ for o in model.OPTIONS:
         sell_qty = 0
     if (buy_qty is not None and buy_qty > 0) or (sell_qty is not None and sell_qty > 0):
         premium_cost = (buy_qty * CONTRACT_SIZE * ask_price[o]) - (sell_qty * CONTRACT_SIZE * bid_price[o])
+        
+        # Calculate next day values for reporting
+        next_d = next_date.get(date_map[o])
+        next_o = next_day_option.get(o)
+        next_day_premium = 0
+        estimated_pnl = None
+        
+        if next_o is not None:
+            next_day_premium = (buy_qty * CONTRACT_SIZE * bid_price[next_o]) - (sell_qty * CONTRACT_SIZE * ask_price[next_o])
+            estimated_pnl = next_day_premium - premium_cost
+        
         results_list.append({
             "Date": date_map[o],
             "Option_ID": o,
             "Symbol": symbol[o],
             "Maturity": maturity_map[o],
+            "Strike": strike[o],
             "Buy": buy_qty,
             "Sell": sell_qty,
             "Ask_Price": ask_price[o],
             "Bid_Price": bid_price[o],
             "Premium_Cost": premium_cost,
+            "Next_Day_Premium_Value": next_day_premium,
+            "Estimated_PnL": estimated_pnl,
+            "Spot_Move": daily_spot_moves[date_map[o]][symbol[o]]
         })
 
 daily_exposure = []
+total_pnl = 0
+
 for d in model.DATES:
     exposure_sum = sum((model.buy[o].value - model.sell[o].value) * CONTRACT_SIZE * exposure[o]
                        for o in model.OPTIONS if date_map[o] == d)
+    
+    # Calculate daily P&L
+    daily_pnl = 0
+    for o in [o for o in model.OPTIONS if date_map[o] == d]:
+        buy_qty = model.buy[o].value or 0
+        sell_qty = model.sell[o].value or 0
+        premium_cost = (buy_qty * CONTRACT_SIZE * ask_price[o]) - (sell_qty * CONTRACT_SIZE * bid_price[o])
+        
+        next_d = next_date.get(d)
+        next_o = next_day_option.get(o)
+        
+        if next_o is not None:
+            next_day_premium = (buy_qty * CONTRACT_SIZE * bid_price[next_o]) - (sell_qty * CONTRACT_SIZE * ask_price[next_o])
+            daily_pnl += (next_day_premium - premium_cost)
+    
+    total_pnl += daily_pnl
     
     # Get the spot moves for this date to include in output
     spot_moves_for_date = {sym: daily_spot_moves[d][sym] for sym in unique_symbols if sym in daily_spot_moves[d]}
     
     daily_exposure.append({
         "Date": d, 
-        "Exposure": exposure_sum
+        "Exposure": exposure_sum,
+        "Daily_PnL": daily_pnl,
+        "Cumulative_PnL": total_pnl,
+        **{f"{sym}_Spot_Move": spot_moves_for_date.get(sym, None) for sym in unique_symbols}
     })
 
 exposure_df = pd.DataFrame(daily_exposure)
@@ -203,5 +285,12 @@ spot_moves_df = pd.DataFrame([
     for sym in unique_symbols
     if sym in daily_spot_moves[date]
 ])
-spot_moves_df.to_csv("../results/milp_daily_spot_moves.csv", index=False)
+spot_moves_df.to_csv("../results/pnlmin_daily_spot_moves.csv", index=False)
 print(f"Daily spot moves saved to ../results/daily_spot_moves.csv")
+
+# Print summary statistics
+print(f"\nOptimization Summary:")
+print(f"Total P&L: ${total_pnl:.2f}")
+print(f"Average Daily P&L: ${total_pnl/len(unique_dates):.2f}")
+print(f"Minimum Daily Exposure: ${exposure_df['Exposure'].min():.2f}")
+print(f"Maximum Daily Exposure: ${exposure_df['Exposure'].max():.2f}")
