@@ -5,11 +5,11 @@ from pyomo.opt import SolverFactory
 # ------------------------------
 # HYPERPARAMETERS
 # ------------------------------
-WALL_TIME = 300  # seconds TODO: Update this using a more robust heuristic (optimality gap, etc.)
+WALL_TIME = 300  # 5-minute time limit
 CONTRACT_SIZE = 100  # contract size for options
 MIN_EXPOSURE = 10_000_000
 SOLVER = 'cbc'
-OUTPUT_FILE = "./results/optimized_trades.csv"
+OUTPUT_FILE = "../results/optimized_trades.csv"
 
 
 # TODO: Update spot move values dynamically each day, sample spot moves rfom some distribution??
@@ -22,7 +22,7 @@ spot_move = {
 # ------------------------------
 # Data Preparation
 # ------------------------------
-data = pd.read_csv("./data/BADSS training data.csv")
+data = pd.read_csv("../data/BADSS training data.csv")
 data.columns = data.columns.str.strip().str.replace(" ", "_")
 data['Option_ID'] = data['Symbol'] + "_" + data['Maturity'] + "_" + data['Strike'].astype(str)
 option_ids = data['Option_ID'].tolist()
@@ -124,7 +124,7 @@ model.obj = Objective(rule=objective_rule, sense=minimize)
 # Solve the Model
 # ------------------------------
 solver = SolverFactory(SOLVER)
-solver.options['sec'] = WALL_TIME  # 10-second time limit
+solver.options['sec'] = WALL_TIME
 results = solver.solve(model, tee=True)
 
 # ------------------------------
