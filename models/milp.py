@@ -37,7 +37,6 @@ unique_symbols = data['Symbol'].unique().tolist()
 # ------------------------------
 # Generate dynamic spot moves for each date and symbol
 # ------------------------------
-# Set random seed for reproducibility (optional)
 np.random.seed(42)
 
 # Create base parameters for each symbol's moves
