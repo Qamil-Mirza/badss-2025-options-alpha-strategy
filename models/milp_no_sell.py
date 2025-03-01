@@ -61,7 +61,7 @@ for date in unique_dates:
             move = np.random.normal(params['mean'], params['std'])
             # TODO: Check what happens if the move is negative
             # Ensure no negative moves (optional, remove if you want to allow downside)
-            move = max(move, 1.0)
+            # move = max(move, 1.0)
             daily_spot_moves[date][sym] = move
 
 # ------------------------------

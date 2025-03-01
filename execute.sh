@@ -7,7 +7,7 @@ conda activate badss
 
 # Navigate and run MILP model
 echo "Running MILP_NO_SELL model..."
-cd models && python milp_no_sell.py && cd ..
+cd models && python test_model.py && cd ..
 
 # Extract results
 echo "Extracting results..."
