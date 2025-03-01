@@ -1,5 +1,4 @@
-# Berkeley IEOR + Wells Fargo BADSS Case Competition
-## **Optimizing Equity Derivative Hedging Strategies**
+# Berkeley IEOR + Wells Fargo BADSS Case Competition: Optimizing Equity Derivative Hedging Strategies
 
 ## **Overview**
 This project is a submission for the **Berkeley Algorithm Design & Systems Solutions (BADSS) Case Competition**, hosted by the **Berkeley IEOR Department** in collaboration with **Wells Fargo**. 
