@@ -9,9 +9,9 @@ from pyomo.opt import SolverFactory
 WALL_TIME = 10  # seconds time limit
 CONTRACT_SIZE = 100  # contract size for options
 MIN_EXPOSURE = 10_000_000
-MODEL_NAME = "MAIN_MODEL"
+MODEL_NAME = "MAIN_MODEL_TEST"
 SOLVER = 'cbc'
-MARKET_DATA_PATH = "../data/BADSS training data.csv"
+MARKET_DATA_PATH = "../data/BADSS test data.csv"
 OUTPUT_FILE = f"../results/{MODEL_NAME}_optimized_trades.csv"
 SPOT_MOVES_DAILY_FILE = f"../results/{MODEL_NAME}_daily_spot_moves.csv"
 
@@ -56,7 +56,6 @@ for date in unique_dates:
         if sym in spot_move_params:
             params = spot_move_params[sym]
             move = np.random.normal(params['mean'], params['std'])
-            # Optionally enforce non-negative moves
             daily_spot_moves[date][sym] = move
 
 # ------------------------------

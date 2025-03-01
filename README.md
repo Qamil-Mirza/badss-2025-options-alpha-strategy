@@ -48,11 +48,22 @@ The current working best performing model is the one that uses a Mixed Integer L
 
 Below we have attached plots to reflect the model's performance
 
-### Daily Total Exposure Maintained and Daily Cost Across Trading Horizon
+### Daily Total Exposure Maintained and Daily Cost Across Trading Horizon (TRAIN)
 ![Daily Total Exposure Maintained and Daily Cost Across Trading Horizon](./plots/cost_and_exposure_over_time_MAIN_MODEL.png)
 
-### Cumulative Cost Over Trading Horizon
+### Cumulative Cost Over Trading Horizon (TRAIN)
 ![Cumulative Cost Over Trading Horizon](./plots/cumulative_cost_over_time_MAIN_MODEL.png)
 
-### Cumulative P&L Over Trading Horizon
+### Cumulative P&L Over Trading Horizon (TRAIN)
 ![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MAIN_MODEL.png)
+
+---
+
+### Daily Total Exposure Maintained and Daily Cost Across Trading Horizon (TEST)
+![Daily Total Exposure Maintained and Daily Cost Across Trading Horizon](./plots/cost_and_exposure_over_time_MAIN_MODEL_TEST)
+
+### Cumulative Cost Over Trading Horizon (TEST)
+![Cumulative Cost Over Trading Horizon](./plots/cumulative_cost_over_time_MAIN_MODEL_TEST.png)
+
+### Cumulative P&L Over Trading Horizon (TRAIN)
+![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MAIN_MODEL_TEST.png)
