@@ -34,8 +34,26 @@ The key components of the project is structured as follows:
 - `results` : contains `<optimized_trades>.csv` which refers to our models decisions and `<daily_spot_moves>.csv` which reflects the spot moves sampled from our predefined uniform distribution to simulate day by day variability
 
 ---
-## Running The Model and Getting The Results
+## **Running The Model and Getting The Results**
 The simplest way to get started is to do the following:
 
 1. Ensure `execute.sh` script has valid permissions, do: `chmod +x execute.sh`
 2. Run `./execute.sh` 
+
+---
+## **Current Results**
+The current working best performing model is the one that uses a Mixed Integer Linear Programming (MILP) approach. At the end of the trading horizon, the MILP model achieved the following:
+
+- **P&L Adjustment = $-933,727**
+- **Total Cost = $933,727**
+
+Below we have attached plots to reflect the model's performance
+
+### Daily Total Exposure Maintained and Daily Cost Across Trading Horizon
+![Daily Total Exposure Maintained and Daily Cost Across Trading Horizon](./plots/cost_and_exposure_over_time_MILP.png)
+
+### Cumulative Cost Over Trading Horizon
+![Cumulative Cost Over Trading Horizon](./plots/cumulative_cost_over_time_MILP.png)
+
+### Cumulative P&L Over Trading Horizon
+![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MILP.png)
