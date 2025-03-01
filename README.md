@@ -65,5 +65,5 @@ Below we have attached plots to reflect the model's performance
 ### Cumulative Cost Over Trading Horizon (TEST)
 ![Cumulative Cost Over Trading Horizon](./plots/cumulative_cost_over_time_MAIN_MODEL_TEST.png)
 
-### Cumulative P&L Over Trading Horizon (TRAIN)
+### Cumulative P&L Over Trading Horizon (TEST)
 ![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MAIN_MODEL_TEST.png)
