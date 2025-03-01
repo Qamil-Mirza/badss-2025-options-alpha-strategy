@@ -6,8 +6,8 @@ source ~/anaconda3/etc/profile.d/conda.sh
 conda activate badss
 
 # Navigate and run MILP model
-echo "Running MILP_NO_SELL model..."
-cd models && python test_model.py && cd ..
+echo "Running MAIN model..."
+cd models && python main_model.py && cd ..
 
 # Extract results
 echo "Extracting results..."

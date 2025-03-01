@@ -41,18 +41,18 @@ The simplest way to get started is to do the following:
 
 ---
 ## **Current Results**
-The current working best performing model is the one that uses a Mixed Integer Linear Programming (MILP) approach. At the end of the trading horizon, the MILP model achieved the following:
+The current working best performing model is the one that uses a Mixed Integer Linear Programming (MILP) approach to optimize for each day. At the end of the trading horizon, the MILP model achieved the following:
 
-- **P&L Adjustment = $-933,727**
-- **Total Cost = $933,727**
+- **P&L Adjustment = $-933,726**
+- **Total Cost = $933,726**
 
 Below we have attached plots to reflect the model's performance
 
 ### Daily Total Exposure Maintained and Daily Cost Across Trading Horizon
-![Daily Total Exposure Maintained and Daily Cost Across Trading Horizon](./plots/cost_and_exposure_over_time_MILP.png)
+![Daily Total Exposure Maintained and Daily Cost Across Trading Horizon](./plots/cost_and_exposure_over_time_MAIN_MODEL.png)
 
 ### Cumulative Cost Over Trading Horizon
-![Cumulative Cost Over Trading Horizon](./plots/cumulative_cost_over_time_MILP.png)
+![Cumulative Cost Over Trading Horizon](./plots/cumulative_cost_over_time_MAIN_MODEL.png)
 
 ### Cumulative P&L Over Trading Horizon
-![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MILP.png)
+![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MAIN_MODEL.png)

@@ -2,7 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-MODEL_NAME = "TEST_MODEL"
+MODEL_NAME = "MAIN_MODEL"
+INCLUDE_SELL = False
 MARKET_DATA_PATH = "./data/BADSS training data.csv"
 OPTIMIZED_TRADES_PATH = f"./results/{MODEL_NAME}_optimized_trades.csv"
 EXPOSURE_BASELINE = 1e7
@@ -53,7 +54,7 @@ def plot_cumulative_cost(daily_df):
 
 def create_pnl_df(market_df, optimized_trades_df):
     # Prep for merge
-    if MODEL_NAME == "MILP_NO_SELL" or MODEL_NAME == "TEST_MODEL":
+    if not INCLUDE_SELL:
         temp_df = optimized_trades_df[["Date", "Option_ID", "Buy", "Premium_Cost"]]
     else:
         temp_df = optimized_trades_df[["Date", "Option_ID", "Buy", "Sell", "Premium_Cost"]]

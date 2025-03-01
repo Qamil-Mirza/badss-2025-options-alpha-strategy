@@ -9,7 +9,7 @@ from pyomo.opt import SolverFactory
 WALL_TIME = 10  # seconds time limit
 CONTRACT_SIZE = 100  # contract size for options
 MIN_EXPOSURE = 10_000_000
-MODEL_NAME = "TEST_MODEL"
+MODEL_NAME = "MAIN_MODEL"
 SOLVER = 'cbc'
 MARKET_DATA_PATH = "../data/BADSS training data.csv"
 OUTPUT_FILE = f"../results/{MODEL_NAME}_optimized_trades.csv"
