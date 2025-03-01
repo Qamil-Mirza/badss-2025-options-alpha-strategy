@@ -67,3 +67,5 @@ Below we have attached plots to reflect the model's performance
 
 ### Cumulative P&L Over Trading Horizon (TEST)
 ![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MAIN_MODEL_TEST.png)
+
+## **Looking At Discrepancies**
