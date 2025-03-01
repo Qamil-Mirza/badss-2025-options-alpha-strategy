@@ -6,16 +6,20 @@ from pyomo.opt import SolverFactory
 # ------------------------------
 # HYPERPARAMETERS
 # ------------------------------
-WALL_TIME = 10  # 5-minute time limit
+# TODO: Stop based on optimality gap
+WALL_TIME = 100  # 5-minute time limit
 CONTRACT_SIZE = 100  # contract size for options
 MIN_EXPOSURE = 10_000_000
+MODEL_NAME = "MILP"
 SOLVER = 'cbc'
-OUTPUT_FILE = "../results/milp_optimized_trades.csv"
+MARKET_DATA_PATH = "../data/BADSS training data.csv"
+OUTPUT_FILE = f"../results/{MODEL_NAME}_optimized_trades.csv"
+SPOT_MOVES_DAILY_FILE = f"../results/{MODEL_NAME}_daily_spot_moves.csv"
 
 # ------------------------------
 # Data Preparation
 # ------------------------------
-data = pd.read_csv("../data/BADSS training data.csv")
+data = pd.read_csv(MARKET_DATA_PATH)
 data.columns = data.columns.str.strip().str.replace(" ", "_")
 data['Option_ID'] = data['Symbol'] + "_" + data['Maturity'] + "_" + data['Strike'].astype(str)
 option_ids = data['Option_ID'].tolist()
@@ -55,6 +59,7 @@ for date in unique_dates:
             # Sample from normal distribution based on symbol parameters
             params = spot_move_params[sym]
             move = np.random.normal(params['mean'], params['std'])
+            # TODO: Check what happens if the move is negative
             # Ensure no negative moves (optional, remove if you want to allow downside)
             move = max(move, 1.0)
             daily_spot_moves[date][sym] = move
@@ -202,5 +207,5 @@ spot_moves_df = pd.DataFrame([
     for sym in unique_symbols
     if sym in daily_spot_moves[date]
 ])
-spot_moves_df.to_csv("../results/milp_daily_spot_moves.csv", index=False)
-print(f"Daily spot moves saved to ../results/daily_spot_moves.csv")
+spot_moves_df.to_csv(SPOT_MOVES_DAILY_FILE, index=False)
+print(f"Daily spot moves saved to {SPOT_MOVES_DAILY_FILE}")

@@ -37,5 +37,5 @@ The key components of the project is structured as follows:
 ## Running The Model and Getting The Results
 The simplest way to get started is to do the following:
 
-1. Ensure `execute.sh` script has valid permissions, do: `meow`
+1. Ensure `execute.sh` script has valid permissions, do: `chmod +x execute.sh`
 2. Run `./execute.sh` 
