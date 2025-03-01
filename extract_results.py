@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-MODEL_NAME = "INTERN"
+MODEL_NAME = "MAIN_MODEL_TRAIN"
 INCLUDE_SELL = False
-MARKET_DATA_PATH = "./data/BADSS test data.csv"
+MARKET_DATA_PATH = "./data/BADSS training data.csv"
 OPTIMIZED_TRADES_PATH = f"./results/{MODEL_NAME}_optimized_trades.csv"
 EXPOSURE_BASELINE = 1e7
 COST_BASELINE = 2e5
