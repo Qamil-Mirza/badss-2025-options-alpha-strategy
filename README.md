@@ -12,8 +12,30 @@ The competition focuses on **developing an optimization model** for **equity der
 
 ---
 
-## **Project Structure**
-I WILL FILL THIS IN LATER LMAO I NEED SLEEP BRO RIP QUAMIL
-
 ## **Installation & Setup**
-Setup is very minimal at the moment as we just need `python 3.x, numpy, matplotlib, pandas`. I have created an environment.yml file to manage dependencies as a "just in case" measure for when the project expands. For now, a simple `pip install numpy matplotlib pandas` will suffice.
+To run the model, we highly recommend you use a conda environment for replicability. Assuming you have `conda`, simply use the provided environment.yml file to get setup with the required dependencies:
+
+- `conda env create -f environment.yml`
+
+And activate the environment with:
+
+- `conda activate badss`
+
+Voila! You should be good to go.
+---
+
+## **Project Structure**
+The key components of the project is structured as follows:
+
+- `data` : contains raw training data and information pertaining to the competition
+- `models` : contains `<model>.py` files for our approach towards the competition
+- `notebooks` : contains jupyter notebooks used for exploratory data analysis and interpreting results
+- `plots` : contains plot images for the given optimized trades
+- `results` : contains `<optimized_trades>.csv` which refers to our models decisions and `<daily_spot_moves>.csv` which reflects the spot moves sampled from our predefined uniform distribution to simulate day by day variability
+
+---
+## Running The Model and Getting The Results
+The simplest way to get started is to do the following:
+
+1. Ensure `execute.sh` script has valid permissions, do: `meow`
+2. Run `./execute.sh` 
