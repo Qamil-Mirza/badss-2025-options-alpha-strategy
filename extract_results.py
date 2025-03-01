@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-MODEL_NAME = "MAIN_MODEL_TEST"
+MODEL_NAME = "INTERN"
 INCLUDE_SELL = False
 MARKET_DATA_PATH = "./data/BADSS test data.csv"
 OPTIMIZED_TRADES_PATH = f"./results/{MODEL_NAME}_optimized_trades.csv"

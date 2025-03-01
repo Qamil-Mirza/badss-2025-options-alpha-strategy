@@ -60,7 +60,7 @@ Below we have attached plots to reflect the model's performance
 ---
 
 ### Daily Total Exposure Maintained and Daily Cost Across Trading Horizon (TEST)
-![Daily Total Exposure Maintained and Daily Cost Across Trading Horizon](./plots/cost_and_exposure_over_time_MAIN_MODEL_TEST)
+![Daily Total Exposure Maintained and Daily Cost Across Trading Horizon](./plots/cost_and_exposure_over_time_MAIN_MODEL_TEST.png)
 
 ### Cumulative Cost Over Trading Horizon (TEST)
 ![Cumulative Cost Over Trading Horizon](./plots/cumulative_cost_over_time_MAIN_MODEL_TEST.png)

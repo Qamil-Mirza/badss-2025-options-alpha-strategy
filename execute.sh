@@ -6,7 +6,7 @@ source ~/anaconda3/etc/profile.d/conda.sh
 conda activate badss
 
 # Navigate and run MILP model
-echo "Running MAIN model..."
+echo "Running main model..."
 cd models && python main_model.py && cd ..
 
 # Extract results
