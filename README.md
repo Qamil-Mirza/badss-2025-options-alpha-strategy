@@ -21,6 +21,7 @@ And activate the environment with:
 - `conda activate badss`
 
 Voila! You should be good to go.
+
 ---
 
 ## **Project Structure**
