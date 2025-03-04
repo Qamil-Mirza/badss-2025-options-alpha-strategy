@@ -41,21 +41,16 @@ The simplest way to get started is to do the following:
 
 ---
 ## **Current Results**
-The current working best performing model is the one that uses a Mixed Integer Linear Programming (MILP) approach to optimize for each day. At the end of the trading horizon, the MILP model achieved the following:
-
-- **P&L Adjustment = $-933,726**
-- **Total Cost = $933,726**
-
-Below we have attached plots to reflect the model's performance
+The current working best performing model is the one that uses a Mixed Integer Linear Programming (MILP) approach to optimize for each day. You can find this model under `models/main_model.py`. At the end of the trading horizon, the MILP model achieved the following:
 
 ### Daily Total Exposure Maintained and Daily Cost Across Trading Horizon (TRAIN)
-![Daily Total Exposure Maintained and Daily Cost Across Trading Horizon](./plots/cost_and_exposure_over_time_MAIN_MODEL.png)
+![Daily Total Exposure Maintained and Daily Cost Across Trading Horizon](./plots/cost_and_exposure_over_time_MAIN_MODEL_TRAIN.png)
 
 ### Cumulative Cost Over Trading Horizon (TRAIN)
-![Cumulative Cost Over Trading Horizon](./plots/cumulative_cost_over_time_MAIN_MODEL.png)
+![Cumulative Cost Over Trading Horizon](./plots/cumulative_cost_over_time_MAIN_MODEL_TRAIN.png)
 
 ### Cumulative P&L Over Trading Horizon (TRAIN)
-![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MAIN_MODEL.png)
+![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MAIN_MODEL_TRAIN.png)
 
 ---
 
@@ -68,4 +63,5 @@ Below we have attached plots to reflect the model's performance
 ### Cumulative P&L Over Trading Horizon (TEST)
 ![Cumulative P&L Over Trading Horizon](./plots/cumulative_pnl_MAIN_MODEL_TEST.png)
 
-## **Looking At Discrepancies**
+## **Team Acknowledgement & Results**
+Our team’s MILP approach was recognized with 2nd place 🥈 out of 20 competing teams. We extend our gratitude to the UC Berkeley IEOR Department and Wells Fargo for providing this challenging opportunity to apply advanced optimization techniques to real-world financial problems.
