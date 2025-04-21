@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-MODEL_NAME = "MAIN_MODEL_TRAIN"
+MODEL_NAME = "MAIN_MODEL_TEST"
 INCLUDE_SELL = False
-MARKET_DATA_PATH = "./data/BADSS training data.csv"
+MARKET_DATA_PATH = "./data/BADSS test data.csv"
 OPTIMIZED_TRADES_PATH = f"./results/{MODEL_NAME}_optimized_trades.csv"
 EXPOSURE_BASELINE = 1e7
 COST_BASELINE = 2e5
@@ -14,10 +14,22 @@ CUMULATIVE_COST_SAVE_PATH = f"./plots/cumulative_cost_over_time_{MODEL_NAME}.png
 
 def plot_daily_cost_and_total_exposure(daily_df):
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(daily_df["Date"], daily_df["Premium_Cost"], marker='o', label="Cost")
-    ax.plot(daily_df["Date"], daily_df["Exposure"], marker='o', label="Exposure")
-    ax.axhline(y=1e7, color='r', linestyle='--', label="10M Exposure baseline")
-    ax.axhline(y=2e5, color='black', linestyle='--', label="200k Cost baseline")
+    ax.plot(
+        daily_df["Date"],
+        daily_df["Premium_Cost"],
+        marker="o",
+        label="Cost",
+        color="#004AAE",
+    )
+    ax.plot(
+        daily_df["Date"],
+        daily_df["Exposure"],
+        marker="o",
+        label="Exposure",
+        color="#ffcc33",
+    )
+    ax.axhline(y=1e7, color="black", linestyle="--", label="10M Exposure baseline")
+    ax.axhline(y=2e5, color="red", linestyle="--", label="200k Cost baseline")
     ax.set_title(f"Daily Total Exposure and Cost ({MODEL_NAME})")
     ax.set_xlabel("Date")
     ax.set_ylabel("Cost / Total Exposure ($)")
@@ -26,21 +38,26 @@ def plot_daily_cost_and_total_exposure(daily_df):
     plt.tight_layout()
     plt.savefig(COST_EXPOSURE_SAVE_PATH)
 
+
 def plot_cumulative_cost(daily_df):
     cumsum = daily_df["Premium_Cost"].cumsum()
-    
+
     total_end_cost = np.round(cumsum.iloc[-1], 2)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(daily_df["Date"], cumsum, marker='o', label="Cumulative Cost")
+    plt.plot(daily_df["Date"], cumsum, marker="o", label="Cumulative Cost", color="#004AAE")
 
     # Highlight the last point
-    plt.scatter(daily_df["Date"].iloc[-1], cumsum.iloc[-1], color='red', zorder=3)
-    plt.annotate(f"{total_end_cost}",
-                 xy=(daily_df["Date"].iloc[-1], cumsum.iloc[-1]),
-                 xytext=(-30, -30), textcoords='offset points',
-                 arrowprops=dict(arrowstyle="->", lw=1),
-                 fontsize=12, color='red')
+    plt.scatter(daily_df["Date"].iloc[-1], cumsum.iloc[-1], color="red", zorder=3)
+    plt.annotate(
+        f"{total_end_cost}",
+        xy=(daily_df["Date"].iloc[-1], cumsum.iloc[-1]),
+        xytext=(-40, -30),
+        textcoords="offset points",
+        bbox=dict(boxstyle="round,pad=0.3", edgecolor="red", facecolor="white"),
+        fontsize=12,
+        color="red",
+    )
 
     # Chart formatting
     plt.title(f"Cumulative Cost Over Time ({MODEL_NAME})")
@@ -52,15 +69,20 @@ def plot_cumulative_cost(daily_df):
     plt.grid()
     plt.savefig(CUMULATIVE_COST_SAVE_PATH)
 
+
 def create_pnl_df(market_df, optimized_trades_df):
     # Prep for merge
     if not INCLUDE_SELL:
         temp_df = optimized_trades_df[["Date", "Option_ID", "Buy", "Premium_Cost"]]
     else:
-        temp_df = optimized_trades_df[["Date", "Option_ID", "Buy", "Sell", "Premium_Cost"]]
+        temp_df = optimized_trades_df[
+            ["Date", "Option_ID", "Buy", "Sell", "Premium_Cost"]
+        ]
 
     # Merge on Option_ID and Date
-    pnl_df = market_df.merge(temp_df, on=["Option_ID", "Date"], how="left", suffixes=("", "_y"))
+    pnl_df = market_df.merge(
+        temp_df, on=["Option_ID", "Date"], how="left", suffixes=("", "_y")
+    )
 
     # Fill NaN values with 0
     pnl_df.fillna(0, inplace=True)
@@ -77,7 +99,9 @@ def create_pnl_df(market_df, optimized_trades_df):
             next_day = row["Date"] + pd.DateOffset(1)
 
             # Find the next day's bid price for the same Option_ID
-            next_day_row = pnl_df[(pnl_df["Date"] == next_day) & (pnl_df["Option_ID"] == row["Option_ID"])]
+            next_day_row = pnl_df[
+                (pnl_df["Date"] == next_day) & (pnl_df["Option_ID"] == row["Option_ID"])
+            ]
 
             if not next_day_row.empty:
                 # Extract bid price for next day
@@ -90,7 +114,7 @@ def create_pnl_df(market_df, optimized_trades_df):
                 # If next day's price is missing, assume full loss (Premium Cost)
                 pnl = -row["Premium_Cost"]
 
-    # TODO: Consider the case for sell transactions
+        # TODO: Consider the case for sell transactions
         else:
             # If not a buy transaction, set PnL to 0
             pnl = 0
@@ -105,6 +129,7 @@ def create_pnl_df(market_df, optimized_trades_df):
 
     return daily_pnl
 
+
 def plot_cumulative_pnl(pnl_df):
     daily_pnl = pnl_df.copy()
     daily_pnl["Cumulative_PnL"] = daily_pnl["PnL"].cumsum()
@@ -112,17 +137,33 @@ def plot_cumulative_pnl(pnl_df):
     total_pnl = np.round(daily_pnl["Cumulative_PnL"].iloc[-1], 2)
 
     plt.figure(figsize=(10, 6))
-    plt.plot(daily_pnl["Date"], daily_pnl["Cumulative_PnL"], marker='o', label="Cumulative PnL")
-    plt.scatter(daily_pnl["Date"].iloc[-1], total_pnl, color='red', s=100, label="Final PnL", edgecolors='black', zorder=3)
-    plt.annotate(f"{total_pnl}",
-             (daily_pnl["Date"].iloc[-1], total_pnl),
-             textcoords="offset points",
-             xytext=(-20, 30),
-             ha='center',
-             fontsize=12,
-             color='red',
-             bbox=dict(boxstyle="round,pad=0.3", edgecolor="red", facecolor="white"))
-    
+    plt.plot(
+        daily_pnl["Date"],
+        daily_pnl["Cumulative_PnL"],
+        marker="o",
+        label="Cumulative PnL",
+        color="#004AAE",
+    )
+    plt.scatter(
+        daily_pnl["Date"].iloc[-1],
+        total_pnl,
+        color="red",
+        s=100,
+        label="Final PnL",
+        edgecolors="black",
+        zorder=3,
+    )
+    plt.annotate(
+        f"{total_pnl}",
+        (daily_pnl["Date"].iloc[-1], total_pnl),
+        textcoords="offset points",
+        xytext=(-20, 30),
+        ha="center",
+        fontsize=12,
+        color="red",
+        bbox=dict(boxstyle="round,pad=0.3", edgecolor="red", facecolor="white"),
+    )
+
     plt.title(f"Cumulative PnL Over Time ({MODEL_NAME})")
     plt.xlabel("Date", fontsize=12)
     plt.ylabel("Cumulative PnL ($)", fontsize=12)
@@ -136,7 +177,13 @@ def plot_cumulative_pnl(pnl_df):
 
 if __name__ == "__main__":
     market_df = pd.read_csv(MARKET_DATA_PATH)
-    market_df['Option_ID'] = market_df["Symbol"] + "_" + market_df["Maturity"] + "_" + market_df["Strike"].astype(str)
+    market_df["Option_ID"] = (
+        market_df["Symbol"]
+        + "_"
+        + market_df["Maturity"]
+        + "_"
+        + market_df["Strike"].astype(str)
+    )
     market_df["Date"] = pd.to_datetime(market_df["Date"])
 
     # clean up optimized trades
@@ -154,8 +201,10 @@ if __name__ == "__main__":
     plot_daily_cost_and_total_exposure(daily_df=daily_df)
     plot_cumulative_cost(daily_df=daily_df)
 
-    df_with_pnl = create_pnl_df(market_df=market_df, optimized_trades_df=optimized_trades_df)
+    df_with_pnl = create_pnl_df(
+        market_df=market_df, optimized_trades_df=optimized_trades_df
+    )
     # df_with_pnl.to_csv(f"./results/pnl_df_{MODEL_NAME}.csv", index=False)
-    
+
     plot_cumulative_pnl(pnl_df=df_with_pnl)
     print("Results extracted and plots saved successfully!")
